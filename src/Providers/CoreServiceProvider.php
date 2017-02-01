@@ -28,10 +28,15 @@ class CoreServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        // Service Binder
         $this->app->bind('Rizalmovic\Core\Contracts\RoleInterface', 'Rizalmovic\Core\Repositories\RoleRepository');
         $this->app->bind('Rizalmovic\Core\Contracts\UserInterface', 'Rizalmovic\Core\Repositories\UserRepository');
+        $this->app->bind('Rizalmovic\Core\Contracts\SettingInterface', 'Rizalmovic\Core\Repositories\SettingRepository');
+
+        // Register Service Provider
         $this->app->register(\Former\FormerServiceProvider::class);
 
+        // Register Alias
         $loader = \Illuminate\Foundation\AliasLoader::getInstance();
         $loader->alias('Former', \Former\Facades\Former::class);
     }

@@ -2,6 +2,7 @@
 
 namespace Rizalmovic\Core\Repositories;
 
+use Illuminate\Contracts\Support\MessageBag;
 use Rizalmovic\Core\Contracts\BaseInterface;
 use App;
 
@@ -17,11 +18,24 @@ class BaseRepository implements BaseInterface
         }
     }
 
+    /**
+     * @param $id
+     * @return bool
+     */
     public function find($id)
     {
-        return $this->response($this->model->find($id));
+        if($result = $this->model->find($id))
+        {
+            return $result->toArray();
+        }
+
+        return false;
     }
 
+    /**
+     * @param $data
+     * @return boolean | \Illuminate\Support\MessageBag
+     */
     public function add($data)
     {
         if(!isset($data['password']) || !$data['password']) {
@@ -31,39 +45,62 @@ class BaseRepository implements BaseInterface
         $query = new $this->model($data);
 
         if($query->save()) {
-            return $this->response($query);
-        } else {
-            return $this->response(false, $query->getErrors());
+            return $query->toArray();
         }
+
+        return $query->getErrors();
     }
 
+    /**
+     * @param $data
+     * @param $id
+     * @return bool | \Illuminate\Support\MessageBag
+     */
     public function update($data, $id)
     {
-        $row = $this->model->find($id);
-        if($row) {
-            return $this->response( $row->update($data) );
-        } else {
-            return $this->response( false );
+
+        if($row = $this->model->find($id)) {
+
+            if($row->update($data)) {
+                return $row->toArray();
+            }
+
+            return $row->getErrors();
+
         }
+
+        return false;
     }
 
+    /**
+     * @param $id
+     * @return bool
+     */
     public function delete($id)
     {
-        $row = $this->model->find($id);
-
-        if($row) {
-            return $this->response( $row->delete() );
-        } else {
-            return $this->response( false );
+        if($row = $this->model->find($id))
+        {
+            return $row->delete();
         }
+
+        return false;
     }
 
+    /**
+     * @param $field
+     * @param $type
+     * @return $this
+     */
     public function orderBy($field, $type)
     {
         $this->model = $this->model->orderBy($field, $type);
         return $this;
     }
 
+    /**
+     * @param $relation
+     * @return $this
+     */
     public function with($relation)
     {
         if(is_array($relation)) {
@@ -77,40 +114,34 @@ class BaseRepository implements BaseInterface
         return $this;
     }
 
+    /**
+     * @param $number
+     * @return $this
+     */
     public function limit($number)
     {
         $this->model = $this->model->take($number);
         return $this;
     }
 
+    /**
+     * @return array
+     */
     public function paginate()
     {
-        return $this->response( $this->model->paginate() );
+        return $this->paginate()->toArray();
     }
 
+    /**
+     * @return array
+     */
     public function all()
     {
-        return $this->response( $this->model->get() );
-    }
-
-    public function response($data, $message = '')
-    {
-        $format = [
-            'status' => 'OK',
-            'result' => null,
-            'message' => null
-        ];
-
-        if($this->start){
-            $format['execution_time'] = microtime(true) - $this->start;
+        if($result = $this->model->get())
+        {
+            return $result->toArray();
         }
 
-        if($message){
-            $format['message'] = $message;
-        }
-
-        $format['result'] = (is_object($data)) ? $data->toArray() : $data;
-
-        return $format;
+        return [];
     }
 }

@@ -4,6 +4,7 @@ namespace Rizalmovic\Core\Entities;
 
 use Illuminate\Notifications\Notifiable;
 use Rizalmovic\Core\Entities\Role;
+use Rizalmovic\Stores\Entities\Store;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Foundation\Auth\Access\Authorizable;
@@ -51,7 +52,8 @@ class User extends Model implements
     ];
 
     protected $relationships = [
-        'roles' => ['belongsToMany', Role::class, 'user_roles']
+        'roles' => ['belongsToMany', Role::class, 'user_roles'],
+        'store' => ['hasOne', Store::class, 'owner_id']
     ];
 
     public function isAdmin()

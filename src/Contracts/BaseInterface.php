@@ -21,6 +21,4 @@ interface BaseInterface
     public function paginate();
 
     public function all();
-
-    public function response($data);
 }
